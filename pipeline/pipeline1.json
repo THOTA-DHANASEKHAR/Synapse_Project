@@ -3,11 +3,11 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "If Condition1",
+				"name": "CHECK_ALL_FILES_AVAILABLE",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "Get Metadata1",
+						"activity": "SFTP_GMD_FILES_LIST",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@equals(length(activity('Get Metadata1').output.childItems),4)",
+						"value": "@equals(length(activity('SFTP_GMD_FILES_LIST').output.childItems),4)\n",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
@@ -56,11 +56,11 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "ITERATE_EACH_FILE",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "If Condition1",
+						"activity": "CHECK_ALL_FILES_AVAILABLE",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -70,7 +70,7 @@
 				"typeProperties": {
 					"activities": [
 						{
-							"name": "Set variable1",
+							"name": "FILENAME",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"policy": {
@@ -80,11 +80,11 @@
 							"userProperties": []
 						},
 						{
-							"name": "If Condition2",
+							"name": "VERIFY FILE NAME",
 							"type": "IfCondition",
 							"dependsOn": [
 								{
-									"activity": "Set variable1",
+									"activity": "FILENAME",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -110,7 +110,7 @@
 										}
 									},
 									{
-										"name": "Set variable2",
+										"name": "TABLE_NAME",
 										"type": "SetVariable",
 										"dependsOn": [
 											{
@@ -127,11 +127,11 @@
 										"userProperties": []
 									},
 									{
-										"name": "Copy data1",
+										"name": "ADLS_TO_ASQLDB_STAGE_TBL",
 										"type": "Copy",
 										"dependsOn": [
 											{
-												"activity": "Set variable2",
+												"activity": "TABLE_NAME",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -150,11 +150,11 @@
 										}
 									},
 									{
-										"name": "Copy data2",
+										"name": "ADLS_TO_ARCHIVE",
 										"type": "Copy",
 										"dependsOn": [
 											{
-												"activity": "Copy data1",
+												"activity": "ADLS_TO_ASQLDB_STAGE_TBL",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -173,11 +173,11 @@
 										}
 									},
 									{
-										"name": "Stored procedure1",
+										"name": "MERGE_STAGE_TBL_TARGET_TBL__TRFERENCE_TBL",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
-												"activity": "Copy data2",
+												"activity": "ADLS_TO_ARCHIVE",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -193,11 +193,11 @@
 										"userProperties": []
 									},
 									{
-										"name": "Stored procedure2",
+										"name": "SAVE LOGS",
 										"type": "SqlServerStoredProcedure",
 										"dependsOn": [
 											{
-												"activity": "Stored procedure1",
+												"activity": "MERGE_STAGE_TBL_TARGET_TBL__TRFERENCE_TBL",
 												"dependencyConditions": [
 													"Succeeded"
 												]
@@ -219,11 +219,11 @@
 				}
 			},
 			{
-				"name": "Delete1",
+				"name": "DELETE_ALL_SFTP_FILES",
 				"type": "Delete",
 				"dependsOn": [
 					{
-						"activity": "ForEach1",
+						"activity": "ITERATE_EACH_FILE",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -242,11 +242,11 @@
 				}
 			},
 			{
-				"name": "Delete2",
+				"name": "DELETE_ALL_ADLS_RAW_FILES",
 				"type": "Delete",
 				"dependsOn": [
 					{
-						"activity": "Delete1",
+						"activity": "DELETE_ALL_SFTP_FILES",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -265,11 +265,11 @@
 				}
 			},
 			{
-				"name": "Web1",
+				"name": "SUCCESS_MAIL",
 				"type": "WebActivity",
 				"dependsOn": [
 					{
-						"activity": "Delete2",
+						"activity": "DELETE_ALL_ADLS_RAW_FILES",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -285,35 +285,35 @@
 				"userProperties": []
 			},
 			{
-				"name": "Web2",
+				"name": "FAIL_MAIL",
 				"type": "WebActivity",
 				"dependsOn": [
 					{
-						"activity": "Get Metadata1",
+						"activity": "SFTP_GMD_FILES_LIST",
 						"dependencyConditions": [
 							"Failed"
 						]
 					},
 					{
-						"activity": "If Condition1",
+						"activity": "CHECK_ALL_FILES_AVAILABLE",
 						"dependencyConditions": [
 							"Failed"
 						]
 					},
 					{
-						"activity": "ForEach1",
+						"activity": "ITERATE_EACH_FILE",
 						"dependencyConditions": [
 							"Failed"
 						]
 					},
 					{
-						"activity": "Delete1",
+						"activity": "DELETE_ALL_SFTP_FILES",
 						"dependencyConditions": [
 							"Failed"
 						]
 					},
 					{
-						"activity": "Delete2",
+						"activity": "DELETE_ALL_ADLS_RAW_FILES",
 						"dependencyConditions": [
 							"Failed"
 						]
@@ -329,7 +329,7 @@
 				"userProperties": []
 			},
 			{
-				"name": "Get Metadata1",
+				"name": "SFTP_GMD_FILES_LIST",
 				"type": "GetMetadata",
 				"dependsOn": [],
 				"policy": {
@@ -356,6 +356,14 @@
 				}
 			}
 		],
+		"variables": {
+			"FILE_NAME": {
+				"type": "String"
+			},
+			"TABLE_NAME": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
