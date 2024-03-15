@@ -1,5 +1,5 @@
 {
-	"name": "pipeline1",
+	"name": "Healthcare_Management_Project",
 	"properties": {
 		"activities": [
 			{
@@ -23,6 +23,8 @@
 						{
 							"name": "Web3",
 							"type": "WebActivity",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [],
 							"policy": {
 								"timeout": "0.12:00:00",
@@ -47,8 +49,17 @@
 								"secureInput": false
 							},
 							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "SQL SERVER",
+								"type": "LinkedServiceReference"
+							},
 							"typeProperties": {
-								"scripts": [],
+								"scripts": [
+									{
+										"type": "Query",
+										"text": "Truncate Table [ubc].[Appeals];\r\nTruncate Table [ubc].[Claims];\r\nTruncate Table [ubc].[Contacts];\r\nTruncate Table [ubc].[Copays];\r\nTruncate Table [ubc].[Diagnoses];\r\nTruncate Table [ubc].[Prescriptions];\r\nTruncate Table [ubc].[Status;"
+									}
+								],
 								"scriptBlockExecutionTimeout": "02:00:00"
 							}
 						}
@@ -68,6 +79,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('SFTP_GMD_FILES_LIST').output.childItems",
+						"type": "Expression"
+					},
 					"activities": [
 						{
 							"name": "FILENAME",
@@ -77,7 +92,14 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "FILE_NAME",
+								"value": {
+									"value": "@item()",
+									"type": "Expression"
+								}
+							}
 						},
 						{
 							"name": "VERIFY FILE NAME",
@@ -92,6 +114,21 @@
 							],
 							"userProperties": [],
 							"typeProperties": {
+								"expression": {
+									"value": "@and(\r\n    contains(item().name,'csv'),\r\n    contains(item().type,'File')\r\n)",
+									"type": "Expression"
+								},
+								"ifFalseActivities": [
+									{
+										"name": "Wait1",
+										"type": "Wait",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"waitTimeInSeconds": 1
+										}
+									}
+								],
 								"ifTrueActivities": [
 									{
 										"name": "SFTP_TO_ADLS",
@@ -124,7 +161,10 @@
 											"secureOutput": false,
 											"secureInput": false
 										},
-										"userProperties": []
+										"userProperties": [],
+										"typeProperties": {
+											"variableName": ""
+										}
 									},
 									{
 										"name": "ADLS_TO_ASQLDB_STAGE_TBL",
@@ -267,6 +307,8 @@
 			{
 				"name": "SUCCESS_MAIL",
 				"type": "WebActivity",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "DELETE_ALL_ADLS_RAW_FILES",
@@ -287,6 +329,8 @@
 			{
 				"name": "FAIL_MAIL",
 				"type": "WebActivity",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "SFTP_GMD_FILES_LIST",
@@ -345,9 +389,12 @@
 						"referenceName": "GMD_SFTP_TO_ADLS",
 						"type": "DatasetReference"
 					},
-					"fieldList": [],
+					"fieldList": [
+						"childItems"
+					],
 					"storeSettings": {
 						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
 						"enablePartitionDiscovery": false
 					},
 					"formatSettings": {
