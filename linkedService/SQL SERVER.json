@@ -1,0 +1,16 @@
+{
+	"name": "SQL SERVER",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=False;data source=localhost\\SQLEXPRESS;initial catalog=master;user id=thota1",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIyN2Y5ODczYi00OTkwLTQ2ZTktOGE1My0wZDhjYTBiMmY2ODYiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "SIR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
