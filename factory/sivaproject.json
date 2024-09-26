@@ -1,0 +1,9 @@
+{
+	"name": "sivaproject",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "7d3c50ce-134b-47cb-b9f2-d194bc49ac5b",
+		"tenantId": "724a5dbe-79d3-4f27-90d5-157ce61dd79d"
+	}
+}
